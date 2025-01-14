@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Basic -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Mobile Metas -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <!-- Site Metas -->
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>SAHAMTRUS</title>
+
+    <!-- Bootstrap core CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/bootstrap.css') }}"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom styles for this template -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <!-- Responsive style -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/responsive.css') }}"
+    />
+  </head>
+
+  <body>
+    <div class="hero_area">
+      <!-- Header section starts -->
+      <header class="header_section">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <a class="navbar-brand" href="/">
+              <img
+                src="{{ url_for('static', filename='images/logo.png') }}"
+                alt="Logo"
+              />
+              <span>SAHAMTRUS</span>
+            </a>
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-toggle="collapse"
+              data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav">
+                <li class="nav-item active">
+                  <a class="nav-link" href="/"
+                    >Home <span class="sr-only">(current)</span></a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/upload">Latih Data</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/test">Uji Data</a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <div class="custom_menu-btn">
+                <button>
+                  <span class="s-1"></span>
+                  <span class="s-2"></span>
+                  <span class="s-3"></span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <!-- End header section -->
+
+      <!-- Slider section -->
+      <section class="slider_section">
+        <div
+          id="carouselExampleIndicators"
+          class="carousel slide"
+          data-ride="carousel"
+        >
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <div class="container-fluid">
+                <div class="row">
+                  <div class="col-md-5 offset-md-1">
+                    <div class="detail-box">
+                      <h1>
+                        Jethro Vetrich <br />
+                        201402152 <br />
+                      </h1>
+                      <p>
+                        PREDIKSI HARGA SAHAM MENGGUNAKAN LSTM DENGAN SENTIMEN
+                        VADER
+                      </p>
+                      <div class="btn-box">
+                        <a href="/upload" class="btn-1">Latih Data</a>
+                        <a href="/test" class="btn-2">Uji Data</a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="offset-md-1 col-md-4 img-container">
+                    <div class="img-box">
+                      <img
+                        src="{{ url_for('static', filename='images/sahamjet1.png') }}"
+                        alt=""
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- End slider section -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+  </body>
+</html>
