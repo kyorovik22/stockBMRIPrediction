@@ -34,7 +34,9 @@ class AttentionLayer(Layer):
 
 
 # Load your pre-trained model (path to your model file)
-model = load_model('model/sahamjet1.h5', custom_objects={'AttentionLayer': AttentionLayer})
+model1 = load_model('model/sahamjet1.h5', custom_objects={'AttentionLayer': AttentionLayer})
+model = load_model('model/sahamjet2.h5')
+
 
 def createMultiStepDataset(features, target, lookBack, steps_ahead):
     X, y = [], []
@@ -193,53 +195,63 @@ def upload_file():
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     if request.method == 'POST':
+        # Periksa keberadaan file
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
+
         file = request.files['file']
+
+        # Periksa apakah ada nama file
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
+
+        # Simpan file jika ada
         if file:
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(filepath)
 
-            # Baca file CSV
-            df = pd.read_csv(filepath)
-            df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
-            df['sentiment'] = df['sentiment'].map({'Positive': 1, 'Negative': -1, 'Neutral': 0})
-            df['compound_score'] = df['compound_score'].apply(
-                lambda x: float(str(x).replace(',', '.')) if isinstance(x, str) else x
-            )
-
-            # Menyiapkan fitur dan target (harga close)
-            features = df.drop(['Date', 'close'], axis=1).values
-            close_prices = df['close'].values
-
-            scaler_features = MinMaxScaler(feature_range=(0, 1))
-            scaler_target = MinMaxScaler(feature_range=(0, 1))
-            features_scaled = scaler_features.fit_transform(features)
-            target_scaled = scaler_target.fit_transform(close_prices.reshape(-1, 1))
-
-            # Prediksi 7 hari ke depan
             try:
-                input_data = features_scaled[-30:].reshape(1, 30, features_scaled.shape[1])  # Ambil 30 data terakhir
-                predictions = model.predict(input_data)  # Melakukan prediksi
-                predictions = scaler_target.inverse_transform(predictions)  # Mengembalikan skala harga ke nilai asli
-                predicted_values = predictions[0]  # Ambil nilai prediksi pertama
+                # Baca file CSV
+                df = pd.read_csv(filepath)
+                df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+                df['sentiment'] = df['sentiment'].map({'Positive': 1, 'Negative': -1, 'Neutral': 0})
+                df['compound_score'] = df['compound_score'].apply(
+                    lambda x: float(str(x).replace(',', '.')) if isinstance(x, str) else x
+                )
 
-                # Gabungkan data historis dengan prediksi untuk grafik
-                full_dates = list(range(len(close_prices) + 1, len(close_prices) + 8))
-                all_close_prices = np.concatenate([close_prices, predicted_values])
+                # Siapkan fitur dan target (harga close)
+                features = df.drop(['Date', 'close'], axis=1).values
+                close_prices = df['close'].values
 
-                # Buat chart untuk harga historis dan prediksi
+                scaler_features = MinMaxScaler(feature_range=(0, 1))
+                scaler_target = MinMaxScaler(feature_range=(0, 1))
+                features_scaled = scaler_features.fit_transform(features)
+                target_scaled = scaler_target.fit_transform(close_prices.reshape(-1, 1))
+
+                # Prediksi 7 hari ke depan
+                if len(features_scaled) < 30:
+                    flash('Data tidak mencukupi untuk prediksi (minimal 30 baris).')
+                    return redirect(request.url)
+
+                input_data = features_scaled[-30:].reshape(1, 30, features_scaled.shape[1])
+                predictions = model.predict(input_data)
+                predictions = scaler_target.inverse_transform(predictions).flatten()
+
+                # Gabungkan data historis dengan prediksi
+                all_close_prices = np.concatenate([close_prices, predictions])
+                all_days = list(range(1, len(all_close_prices) + 1))
+
+                # Plot grafik
                 plt.figure(figsize=(12, 6))
-                plt.plot(range(1, len(close_prices) + 1), close_prices, label='Harga Historis', marker='o', color ='blue')
-                plt.plot(full_dates, all_close_prices[-7:], label='Prediksi 7 Hari ke Depan', marker='x', color='red')
+                plt.plot(all_days, all_close_prices, label='Harga Historis dan Prediksi', marker='o', color='blue')
+                plt.axvline(x=len(close_prices), color='gray', linestyle='--', label='Awal Prediksi')
                 plt.title('Harga Saham dan Prediksi (7 Hari)')
                 plt.xlabel('Hari ke-')
                 plt.ylabel('Harga Saham')
                 plt.legend()
+                plt.grid()
 
                 # Simpan chart sebagai gambar
                 img = io.BytesIO()
@@ -248,12 +260,12 @@ def test():
                 chart_url = base64.b64encode(img.getvalue()).decode()
                 plt.close()
 
+                predictions_data = [{'day': i + 1, 'predicted_price': pred} for i, pred in enumerate(predictions)]
                 flash('Prediction completed and chart generated!')
-                predictions_data = [{'day': i + 1, 'predicted_price': pred} for i, pred in enumerate(predicted_values)]
                 return render_template('hasilTest.html', chart_url=chart_url, predictions=predictions_data)
 
-            except ValueError:
-                flash('Data tidak mencukupi untuk prediksi (minimal 30 baris).')
+            except Exception as e:
+                flash(f'Error processing file: {str(e)}')
                 return redirect(request.url)
 
     return render_template('test.html')
